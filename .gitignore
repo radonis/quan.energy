@@ -3,6 +3,8 @@
 .streamlit/secrets.local.toml
 .env
 .env.local
+CLAUDE_LOCAL.md
+CLAUDE_PRIVATE.md
 
 # Claude
 .claude/
