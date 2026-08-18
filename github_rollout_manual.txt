@@ -1,0 +1,281 @@
+================================================================================
+  GITHUB ROLLOUT MANUAL - QUANT ENERGY TRADING APP
+  Repository: https://github.com/radonis/quan.energy
+  Sensitive Data Policy & Developer Guide
+================================================================================
+
+🔴 CONFIDENTIAL & SENSITIVE DATA POLICY
+================================================================================
+
+⚠️ CRITICAL: THESE MUST NEVER BE PUSHED TO GITHUB ⚠️
+
+1. SECRETS & API KEYS
+   ├─ .streamlit/secrets.toml (Supabase URL, Anon Key, API Keys)
+   ├─ .env files (all variations)
+   ├─ .env.local
+   ├─ .env.production
+   └─ Any file containing passwords or API tokens
+
+2. DATABASE CREDENTIALS
+   ├─ Database connection strings
+   ├─ PostgreSQL/DuckDB credentials
+   ├─ SSH private keys
+   └─ OVH server credentials
+
+3. FINANCIAL DATA
+   ├─ trades.json (Trade history)
+   ├─ tso_trades.json (TSO trade data)
+   ├─ 26_transactions.xlsx (Transaction records)
+   ├─ *.parquet files (Market data - large files)
+   └─ *.duckdb (Local databases)
+
+4. LARGE DATA DIRECTORIES
+   ├─ PK5/ (PSE data)
+   ├─ prices/ (Market prices - 100MB+)
+   ├─ energy_charts/ (German energy data)
+   └─ ubuntu/ (OVH mirror directory)
+
+5. PRIVATE CONFIGURATION
+   ├─ .claude/ (Claude Code settings)
+   ├─ .vscode/ (Local IDE settings)
+   ├─ .idea/ (JetBrains IDE settings)
+   └─ CLAUDE.md (May contain sensitive context)
+
+6. GENERATED & CACHE FILES
+   ├─ __pycache__/ (Python bytecode)
+   ├─ *.pyc, *.pyo (Compiled Python)
+   ├─ .streamlit/cache/ (Streamlit cache)
+   ├─ .pytest_cache/ (Test cache)
+   └─ .egg-info/ (Package metadata)
+
+================================================================================
+✅ WHAT IS SAFE TO PUSH TO GITHUB
+================================================================================
+
+1. SOURCE CODE
+   ├─ app.py (Main application)
+   ├─ shared.py (Shared utilities)
+   ├─ page_modules/*.py (All page modules)
+   └─ procedures/*.py (Data pipelines)
+
+2. CONFIGURATION (non-sensitive)
+   ├─ cds_params.json (CDS model parameters - NO secrets)
+   ├─ ccs_params.json (CCS model parameters - NO secrets)
+   ├─ .gitignore (Git ignore file)
+   └─ requirements.txt (Python dependencies)
+
+3. DOCUMENTATION
+   ├─ CLAUDE.md (Project documentation - review before push!)
+   ├─ README.md (Project overview)
+   ├─ examples/project_plan.pdf (Project timeline)
+   └─ examples/*.md (Technical specifications)
+
+4. EXAMPLE DATA (demo only)
+   ├─ examples/coal/data.csv (Sample PSCMI data - public)
+   ├─ examples/*.ipynb (Jupyter notebooks - example analysis)
+   └─ examples/arch/*.pdf (Architecture documentation)
+
+================================================================================
+🔧 SETUP FOR NEW DEVELOPERS
+================================================================================
+
+1. CLONE REPOSITORY
+   $ git clone https://github.com/radonis/quan.energy.git
+   $ cd quan.energy
+
+2. CREATE LOCAL SECRETS FILE (NOT TRACKED BY GIT)
+   $ mkdir -p .streamlit
+   $ cat > .streamlit/secrets.toml << EOF
+   [supabase]
+   url = "YOUR_SUPABASE_URL"
+   key = "YOUR_SUPABASE_ANON_KEY"
+
+   [ovh]
+   db_path = "/home/ubuntu/db/forecast_db.duckdb"
+   de_fore_path = "/home/ubuntu/data/de/DE_Price_72H_Forecast.parquet"
+   EOF
+
+3. CREATE .env FILE (NOT TRACKED BY GIT)
+   $ cat > .env << EOF
+   SUPABASE_URL=your_url
+   SUPABASE_KEY=your_key
+   OVH_HOST=51.254.131.14
+   OVH_USER=ubuntu
+   EOF
+
+4. VERIFY .gitignore CONTAINS SECRETS
+   Check that .gitignore includes:
+   ✓ .streamlit/secrets.toml
+   ✓ .env
+   ✓ .env.local
+   ✓ .claude/
+   ✓ trades.json
+   ✓ tso_trades.json
+   ✓ *.parquet
+   ✓ *.duckdb
+
+================================================================================
+📋 BEFORE EACH PUSH TO GITHUB
+================================================================================
+
+MANDATORY CHECKLIST:
+
+□ Run: git status
+  ✓ Check NO secrets files are being added
+  ✓ Check NO parquet files
+  ✓ Check NO json data files
+
+□ Run: git diff --cached
+  ✓ Review EXACTLY what will be pushed
+  ✓ Look for sensitive info in code changes
+
+□ Run: git log -1
+  ✓ Verify commit message is clear
+
+□ NEVER do: git add .
+  ✓ Always add specific files: git add app.py page_modules/
+
+□ NEVER commit: --no-verify
+  ✓ Let pre-commit hooks validate your changes
+
+================================================================================
+🚨 ACCIDENTAL COMMIT? RECOVERY STEPS
+================================================================================
+
+IF YOU COMMITTED SECRETS:
+
+1. REMOVE FROM STAGING (before push):
+   $ git rm --cached .streamlit/secrets.toml
+   $ git commit --amend -m "Remove secrets"
+   $ git push
+
+2. IF ALREADY PUSHED TO GITHUB:
+   ⚠️ CRITICAL: Rotate all compromised keys immediately!
+
+   a) Invalidate old secrets:
+      - Supabase: Regenerate API keys in project settings
+      - OVH: Change SSH password/keys
+
+   b) Contact repository admin
+
+   c) Remove from git history:
+      $ git filter-branch --tree-filter 'rm -f .streamlit/secrets.toml'
+      $ git push --force
+
+   d) Add new secrets to .gitignore
+
+   e) All collaborators must: git reset --hard origin/main
+
+================================================================================
+🔄 DEPLOYMENT WORKFLOW
+================================================================================
+
+LOCAL TESTING:
+1. Clone + setup secrets locally
+2. streamlit run app.py
+3. Test all changes
+4. Run: git status → verify safe files only
+5. Commit: git commit -m "feat: description"
+6. Push: git push origin main
+
+PRODUCTION DEPLOYMENT (OVH):
+1. SSH to OVH: ssh ubuntu@51.254.131.14
+2. CD to app dir: cd ~/quant_energy
+3. Update code: git pull origin main
+4. Secrets are on server (NOT in repo):
+   └─ .streamlit/secrets.toml (locally managed)
+   └─ Database paths (env variables)
+5. Restart service: sudo systemctl restart quant_energy
+
+STREAMLIT CLOUD DEPLOYMENT:
+1. Push to main branch on GitHub
+2. Connect repo to streamlit.io/cloud
+3. ADD SECRETS in Streamlit Cloud settings:
+   └─ Supabase URL + Key
+   └─ OVH paths (if needed)
+4. Streamlit auto-deploys on main push
+
+================================================================================
+📝 GIT WORKFLOW BEST PRACTICES
+================================================================================
+
+COMMIT MESSAGES:
+✓ git commit -m "feat: Add auth module to Coal page"
+✓ git commit -m "fix: Correct date parsing in PSCMI loader"
+✓ git commit -m "docs: Add GitHub rollout manual"
+✗ git commit -m "update"
+✗ git commit -m "changes"
+
+BRANCHES:
+✓ Main branch: production-ready code only
+✓ Feature branches: git checkout -b feature/auth-system
+✓ Merge via: git merge feature/auth-system
+✓ Delete after: git branch -d feature/auth-system
+
+BEFORE MERGE:
+□ All tests pass
+□ No secrets in changes
+□ Code reviewed
+□ No conflicts with main
+
+================================================================================
+⚙️ CONFIGURATION FILES THAT SHOULD NOT CONTAIN SECRETS
+================================================================================
+
+✅ cds_params.json - Example:
+{
+  "transport_pln_gj": 10.0,
+  "blocks": {
+    "1000 MW": {"efficiency_pct": 45.0, "emission_tco2_mwh": 0.82}
+  }
+}
+
+✅ ccs_params.json - Example:
+{
+  "technologies": {
+    "CCGT modern": {"efficiency_pct": 60.0, "emission_tco2_mwh": 0.34}
+  }
+}
+
+These are model parameters, NOT secrets. Safe to push.
+
+================================================================================
+🔐 SECURITY REMINDERS
+================================================================================
+
+1. NEVER hardcode credentials in Python files
+   ✗ WRONG: supabase_key = "eyJhbGciOi..."
+   ✓ RIGHT: supabase_key = st.secrets["supabase"]["key"]
+
+2. NEVER commit .streamlit/secrets.toml
+   ✓ Use: git check-ignore .streamlit/secrets.toml
+
+3. VERIFY .gitignore is up-to-date
+   ✓ Before each release: git check-ignore -v */*
+
+4. Use SSH keys for OVH, not passwords
+   ✓ ssh-keygen -t ed25519
+   ✓ ssh-copy-id ubuntu@51.254.131.14
+
+5. Rotate secrets regularly
+   ✓ Supabase: Quarterly
+   ✓ OVH SSH keys: When team changes
+   ✓ API keys: On any suspected leak
+
+================================================================================
+📞 SUPPORT & QUESTIONS
+================================================================================
+
+Repository: https://github.com/radonis/quan.energy
+Issues: https://github.com/radonis/quan.energy/issues
+
+For security concerns:
+1. DO NOT open public GitHub issue
+2. Contact repository owner directly
+3. Include: What was exposed + When + How to fix
+
+================================================================================
+END OF GITHUB ROLLOUT MANUAL
+Last Updated: 2026-08-18
+Version: 1.0
+================================================================================
