@@ -1,0 +1,22 @@
+Z serwera do lokalnego folderu c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\ potrzebujesz:
+
+Pliki pojedyncze:
+
+
+scp ubuntu@51.254.131.14:~/quant_energy/FixingPricesH.parquet "c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\"
+scp ubuntu@51.254.131.14:~/quant_energy/trades.json "c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\"
+scp ubuntu@51.254.131.14:~/quant_energy/tso_trades.json "c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\"
+Katalogi (rekurencyjnie):
+
+
+scp -r ubuntu@51.254.131.14:~/quant_energy/prices "c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\"
+scp -r ubuntu@51.254.131.14:~/quant_energy/PK5 "c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\"
+scp -r ubuntu@51.254.131.14:~/quant_energy/energy_charts "c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\"
+Wszystkie komendy wklejasz w lokalnym PowerShell/cmd (nie na OVH).
+
+done
+Teraz uruchom lokalnie:
+
+
+streamlit run "c:\Users\rlucz\OneDrive\Pulpit\Data\Aplikacja\app.py"
+I przetestuj strzałki na FixTrade i TSOTrade.

@@ -1,0 +1,2 @@
+
+1. into_ex2.py - procedura która automatycznie w kontekœcie katalogu zmienia pliki parquest na excel. python3

@@ -1,0 +1,42 @@
+{
+  "transport_pln_gj": 3.0,
+  "year_adjustments": {
+    "Y": {
+      "ets_delta": 2.5,
+      "swap_delta": 0.0,
+      "coal_delta": 0.0
+    },
+    "Y+1": {
+      "ets_delta": 3.5,
+      "swap_delta": 0.13,
+      "coal_delta": 3.0
+    },
+    "Y+2": {
+      "ets_delta": 4.5,
+      "swap_delta": 0.23,
+      "coal_delta": 4.0
+    },
+    "Y+3": {
+      "ets_delta": 5.5,
+      "swap_delta": 0.35,
+      "coal_delta": 5.0
+    }
+  },
+  "blocks": {
+    "1000 MW": {
+      "efficiency_pct": 45.0,
+      "emission_tco2_mwh": 0.82,
+      "other_costs_pln_mwh": 0.0
+    },
+    "500 MW": {
+      "efficiency_pct": 39.0,
+      "emission_tco2_mwh": 0.95,
+      "other_costs_pln_mwh": 0.0
+    },
+    "200 MW": {
+      "efficiency_pct": 34.0,
+      "emission_tco2_mwh": 1.1,
+      "other_costs_pln_mwh": 0.0
+    }
+  }
+}

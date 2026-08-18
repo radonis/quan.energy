@@ -1,0 +1,19 @@
+{
+  "technologies": {
+    "CCGT modern": {
+      "efficiency_pct": 60.0,
+      "emission_tco2_mwh": 0.34,
+      "other_costs_pln_mwh": 0.0
+    },
+    "CCGT older": {
+      "efficiency_pct": 54.0,
+      "emission_tco2_mwh": 0.38,
+      "other_costs_pln_mwh": 0.0
+    },
+    "OCGT": {
+      "efficiency_pct": 38.0,
+      "emission_tco2_mwh": 0.54,
+      "other_costs_pln_mwh": 0.0
+    }
+  }
+}

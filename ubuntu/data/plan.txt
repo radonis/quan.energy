@@ -1,0 +1,4 @@
+1. zrobiæ now¹ pk5, table frames. umieœciæ tam koniecznie historiê cen niemiec - porównaæ do fixing 2
+2. œci¹gaczke do cen niemieckich - historia
+3. Zrobiæ jedn¹ tablicê, gdzie bêdzie: fix1, fix2, de
+4. zrobiæ system do tradingu, za pomoc¹ colaba

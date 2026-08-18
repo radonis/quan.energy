@@ -1,0 +1,67 @@
+# Secrets & Environment
+.streamlit/secrets.toml
+.streamlit/secrets.local.toml
+.env
+.env.local
+
+# Claude
+.claude/
+
+# Data files (sensitive/large)
+trades.json
+tso_trades.json
+*.parquet
+*.duckdb
+PK5/
+prices/
+energy_charts/
+pics/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+.directory
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Cache
+.cache/
+*.cache

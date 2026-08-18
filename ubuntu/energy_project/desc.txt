@@ -1,0 +1,5 @@
+
+1. DE_forecast.py - procedura, która ³¹czy siê z baza danych w DE (electrictymap) i pobiera dane. katalog data/DE. dwa pliki forecast i history
+2. tge_fixing.py - procedura, która ³¹czy siê z TGE i migruje dane tge z fixingu
+3. fore01 - tworzy widoki na bazie danych parquest
+4. fore02 - tworzy features i updateuje bazê danych
