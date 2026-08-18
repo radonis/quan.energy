@@ -31,38 +31,45 @@
 
 ---
 
-## 📋 In Progress (Wtorek)
+## ✅ Completed (Wtorek)
 
-### Task 2: Auth Integration
-- [ ] **2.1: page_modules/auth.py** (3h)
+### Task 2: Auth Integration ✅
+- [x] **2.1: page_modules/auth.py** - Supabase-based auth
   - `hash_password()` - SHA256 hashing
-  - `register()` - new user registration
-  - `login()` - user authentication
+  - `register()` - new user registration + default 'viewer' role
+  - `login()` - user authentication via password_hash
   - `get_user_role()` - fetch user role from Supabase
-  - `render_login_page()` - Streamlit UI with login/register tabs
+  - `render_login_page()` - Streamlit UI with login/register tabs (Polish)
 
-- [ ] **2.2: page_modules/permissions.py** (1h)
+- [x] **2.2: page_modules/permissions.py** - role-based access control
   - `has_access()` - check module access
   - `get_available_modules()` - list user modules
+  - `get_user_role()` - fetch role helper
   - `check_permission()` - decorator for access control
 
-- [ ] **2.3: app.py modifications** (1h)
-  - Add auth check on startup
-  - Sidebar: user info + logout button
-  - Dynamic module selector based on permissions
+- [x] **2.3: app.py modifications** - Supabase auth integration
+  - Replaced password-based auth with Supabase
+  - Sidebar: user email + role display
+  - Logout button with session clear
+  - Removed old cookie + password constants
 
-- [ ] **2.4: .streamlit/secrets.toml** (done)
-  - Supabase credentials stored locally
+- [x] **2.4: .streamlit/secrets.toml** - credentials stored locally (already done)
 
 ---
 
-## 🎯 Next Steps (Środa+)
+## 📋 In Progress (Środa)
 
 ### Task 3: Admin Panel (Środa)
 - [ ] **3.1: page_modules/admin.py** (3h)
   - TAB 1: User management (list, delete)
   - TAB 2: Module access assignment
   - TAB 3: Role management (viewer/trader/admin)
+  
+**Setup notes for Wednesday**:
+- Admin module already scaffolded at `page_modules/admin.py` (replaced in Task 1.3)
+- Supabase tables ready: `users`, `user_roles`, `module_access`
+- Use permissions.get_user_role() to check if admin
+- Render admin page only if authenticated user has 'admin' role
 
 ### Task 4: Testing & Deploy (Czwartek)
 - [ ] Local testing (login/register/access/admin)
@@ -113,18 +120,21 @@ ETS, CDS, CCS, Prices, FixTrade, TSOTrade
 | Day | Tasks | Status |
 |-----|-------|--------|
 | Pn (8/18) | GitHub + Supabase + Structure | ✅ DONE |
-| Wt (8/19) | Auth Integration | ⏳ TODO |
+| Wt (8/19) | Auth Integration | ✅ DONE |
 | Śr (8/20) | Admin Panel | ⏳ TODO |
 | Cz (8/21) | Testing & Deploy | ⏳ TODO |
 | Pt (8/22) | Docs & Release | ⏳ TODO |
 
 ---
 
-## 🚀 Start of Day Checklist (Wtorek)
+## 🚀 Start of Day Checklist (Środa - Admin Panel)
 
-- [ ] Review this PROJECT_STATUS.md
-- [ ] Verify `.streamlit/secrets.toml` exists locally
-- [ ] Verify Supabase project is accessible
-- [ ] Start with Task 2.1: auth.py implementation
-- [ ] End with `git push` of completed code
+- [ ] Read this PROJECT_STATUS.md (updated with Task 2 completion)
+- [ ] Review auth.py + permissions.py implementation from Tuesday
+- [ ] Check admin_old.py backup to understand original admin structure
+- [ ] Start with Task 3.1: admin.py implementation
+  - Tab 1: List users from `users` table, delete option
+  - Tab 2: Manage `module_access` table (add/remove modules per user)
+  - Tab 3: Manage `user_roles` table (assign role: admin/trader/viewer)
+- [ ] End with `git push` of completed admin panel
 
