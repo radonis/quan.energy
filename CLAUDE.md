@@ -30,31 +30,34 @@ Streamlit intraday/spot trading dashboard for the Polish energy market.
 - **Admin**: Parquet, Logs, Admin, PSE_Viewer, CDS, CCS
 
 ## Auth
-- Password: `qe2026`, 14-day cookie persistence via `extra_streamlit_components`
-- Cookie name: `qe_auth`, value: `qe_ok_2026`
+- Password: Defined in `.streamlit/secrets.toml` (not in repo)
+- Cookie persistence: 14-day via `extra_streamlit_components`
+- Cookie name: `qe_auth`
+- **NOTE**: Credentials stored securely in production environment only
 
 ## Environment variables
 - `FORECAST_DB_PATH` — DuckDB forecast database (default: `/home/ubuntu/db/forecast_db.duckdb`)
 - `DE_FORE_PATH` — DE 72H price forecast parquet (default: `/home/ubuntu/data/de/DE_Price_72H_Forecast.parquet`)
 
 ## Production server (OVH)
-- **SSH**: `ssh ubuntu@51.254.131.14` (password auth)
+- **SSH**: Connect via configured SSH alias `ovh` (see team credentials)
 - **App directory**: `~/quant_energy/`
-- **Deploy app**: `scp app.py ubuntu@51.254.131.14:~/quant_energy/app.py`
-- **Restart service**: `ssh ubuntu@51.254.131.14 "sudo systemctl restart quant_energy"`
+- **Deploy app**: `scp app.py ovh:~/quant_energy/app.py`
+- **Restart service**: `ssh ovh "sudo systemctl restart quant_energy"`
 - **Domains**: `enpuls.pl`, `arvedi.pl`, `quan.energy` → port 8501
 - **Nginx config**: `/etc/nginx/sites-available/enpuls`
+- **NOTE**: Server credentials stored in team password manager, not in repo
 
 ## Data sync from server
-See `procedura_kopiowania_danych_z_OVH.txt` for full SCP commands. Key directories to sync:
-```
-scp ubuntu@51.254.131.14:~/quant_energy/FixingPricesH.parquet .
-scp ubuntu@51.254.131.14:~/quant_energy/trades.json .
-scp ubuntu@51.254.131.14:~/quant_energy/tso_trades.json .
-scp -r ubuntu@51.254.131.14:~/quant_energy/prices .
-scp -r ubuntu@51.254.131.14:~/quant_energy/PK5 .
-scp -r ubuntu@51.254.131.14:~/quant_energy/energy_charts .
-```
+See `procedura_kopiowania_danych_z_OVH.txt` (stored locally, not in repo) for full SCP commands.
+Key directories to sync:
+- `FixingPricesH.parquet`
+- `trades.json`, `tso_trades.json`
+- `prices/` directory
+- `PK5/` directory
+- `energy_charts/` directory
+
+**NOTE**: Use SSH alias `ovh` configured in your local `.ssh/config`
 
 ## Run locally
 ```
