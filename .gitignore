@@ -6,6 +6,11 @@
 CLAUDE_LOCAL.md
 CLAUDE_PRIVATE.md
 
+# Backup files
+*_old.py
+*_backup.py
+*.bak
+
 # Claude
 .claude/
 
