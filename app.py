@@ -11,115 +11,34 @@ except Exception:
 
 st.set_page_config(page_title="Quan.Energy", page_icon=_page_icon, layout="wide")
 
-# ── Auth constants ────────────────────────────────────────────────────────────
-# SHA-256 of the login password — plaintext never stored in code
-_PWD_HASH      = "4467232f90e9b4f16495c19608c32611b480cad9a13b2daae14a3565c406628f"
-# HMAC-SHA256 cookie token — not guessable without the secret
-_COOKIE_SECRET = "2d5953315138a7e1229e70bcb0fb5f46b3b84193744a8ed25f887cb47ca0a437"
-_COOKIE_TOKEN  = hmac.new(_COOKIE_SECRET.encode(), b"qe_session_v1", hashlib.sha256).hexdigest()
+# ── Auth check (Supabase-based) ────────────────────────────────────────────────
+from page_modules import auth
 
-def _verify_password(pwd: str) -> bool:
-    return hmac.compare_digest(
-        hashlib.sha256(pwd.encode()).hexdigest(), _PWD_HASH
-    )
-
-# ── Cookie manager ────────────────────────────────────────────────────────────
-try:
-    import extra_streamlit_components as stx
-    _cookie_mgr  = stx.CookieManager(key="qe_cookie_mgr")
-    _COOKIE_NAME = "qe_auth"
-    _COOKIE_VAL  = _COOKIE_TOKEN
-    _COOKIES_OK  = True
-except Exception:
-    _COOKIES_OK  = False
-
-# ── Login page ────────────────────────────────────────────────────────────────
-def _render_login_page():
-    _bg_path = os.path.join(os.path.dirname(__file__), "pics", "NJGT.jpg")
-    try:
-        with open(_bg_path, "rb") as _bf:
-            _bg_b64 = base64.b64encode(_bf.read()).decode()
-        _bg_css = f"url('data:image/jpeg;base64,{_bg_b64}')"
-    except Exception:
-        _bg_css = "none"
-
-    st.markdown(f"""
-        <style>
-        .stApp {{
-            background-color: #ffffff;
-            background-image: {_bg_css};
-            background-size: auto 60%;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        section[data-testid="stSidebar"] {{ display: none; }}
-        header[data-testid="stHeader"] {{ display: none; }}
-        .block-container {{
-            max-width: 420px !important;
-            margin: 0 auto !important;
-            padding-top: calc(50vh - 140px) !important;
-            padding-bottom: 2rem !important;
-        }}
-        .login-card {{
-            background: rgba(10, 15, 30, 0.82);
-            backdrop-filter: blur(8px);
-            border-radius: 16px;
-            padding: 2rem 2rem 0.5rem 2rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        }}
-        </style>
-        <div class="login-card">
-            <div style="text-align:center; margin-bottom:2.2rem;">
-                <div style="font-size:1.1rem; font-weight:700; letter-spacing:3px;
-                            background: linear-gradient(135deg,#00e5ff,#2979ff);
-                            -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-                    QUAN.ENERGY
-                </div>
-                <div style="color:#aaa; font-size:0.78rem; margin-top:6px; letter-spacing:1px;">
-                    TRADING MONITORING SYSTEM
-                </div>
-            </div>
-        </div>
-        <div style="margin-top: 1.4rem;"></div>
-    """, unsafe_allow_html=True)
-
-def _check_password():
+def _check_auth():
+    """Check authentication status, render login page if needed"""
     if st.session_state.get("authenticated"):
         return
-    if _COOKIES_OK:
-        try:
-            if _cookie_mgr.get(_COOKIE_NAME) == _COOKIE_VAL:
-                st.session_state.authenticated = True
-                return
-        except Exception:
-            pass
-    _render_login_page()
-    pwd = st.text_input("Password", type="password", placeholder="Enter password",
-                        label_visibility="collapsed")
-    if st.button("Login", type="primary", use_container_width=True):
-        if _verify_password(pwd):
-            st.session_state.authenticated = True
-            if _COOKIES_OK:
-                try:
-                    _cookie_mgr.set(
-                        _COOKIE_NAME, _COOKIE_VAL,
-                        expires_at=datetime.now() + timedelta(days=14),
-                    )
-                except Exception:
-                    pass
-            st.rerun()
-        else:
-            st.error("Wrong password")
-    st.stop()
+    auth.render_login_page()
 
-_check_password()
+_check_auth()
 
 # ── Page imports ──────────────────────────────────────────────────────────────
-from page_modules import spot, trading, tso, forward, forecast, admin, otf_trading, spot_analysis, var_trading, ancillary, system_monitor, fc_module, fc_hourly_module, page_stats, spot_update
+from page_modules import spot, trading, tso, forward, forecast, admin, otf_trading, spot_analysis, var_trading, ancillary, system_monitor, fc_module, fc_hourly_module, page_stats, spot_update, permissions
 
 # ── Sidebar nav ───────────────────────────────────────────────────────────────
 st.sidebar.title("Menu")
+
+# ── User info & logout ────────────────────────────────────────────────────────
+st.sidebar.markdown("---")
+user_email = st.session_state.get("user_email", "Unknown")
+user_role = permissions.get_user_role(st.session_state.get("user_id", 0))
+st.sidebar.markdown(f"**👤 {user_email}**")
+st.sidebar.markdown(f"<small style='color:#888'>Rola: {user_role}</small>", unsafe_allow_html=True)
+
+if st.sidebar.button("🔓 Wyloguj", use_container_width=True, key="logout_btn"):
+    st.session_state.clear()
+    st.rerun()
+st.sidebar.markdown("---")
 
 _SPOT_PAGES    = ["Prices", "German SPOT", "SPOT Daily", "SPOTS History", "Update"]
 _TRADING_PAGES = ["FixTrade", "TSOTrade", "VAR", "P&L Dashboard", "FixHeatmap", "TSOHeatmap", "SpreadMap", "OTF Trades", "OTF MtM"]
