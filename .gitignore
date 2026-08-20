@@ -24,6 +24,9 @@ prices/
 energy_charts/
 pics/
 
+# Local documentation & notes (not for GitHub)
+examples/
+
 # Python
 __pycache__/
 *.pyc
