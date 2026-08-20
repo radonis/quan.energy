@@ -1,98 +1,135 @@
 """
 Authentication module for Quant Energy Trading App
-Handles user login, registration, and session management via Supabase
+Handles user login, registration via Supabase REST API
 """
 
 import streamlit as st
-import pandas as pd
-from supabase import create_client, Client
+import requests
 import hashlib
 from datetime import datetime
 import os
 import base64
 
-def _get_supabase_client() -> Client:
-    """Initialize Supabase client from secrets"""
-    url = st.secrets["supabase"]["url"]
-    key = st.secrets["supabase"]["key"]
-    return create_client(url, key)
+SUPABASE_URL = st.secrets["supabase"]["url"]
+SUPABASE_KEY = st.secrets["supabase"]["key"]
 
 def hash_password(password: str) -> str:
     """Hash password using SHA256"""
     return hashlib.sha256(password.encode()).hexdigest()
 
 def register(email: str, password: str) -> tuple[bool, str]:
-    """Register new user in Supabase
+    """Register new user via Supabase REST API
 
     Returns (success, message)
     """
     try:
-        client = _get_supabase_client()
         password_hash = hash_password(password)
 
         # Check if user exists
-        response = client.table("users").select("id").eq("email", email).execute()
-        if response.data:
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
+
+        check_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/users?email=eq.{email}&select=id",
+            headers=headers,
+            timeout=10
+        )
+
+        if check_response.json():
             return False, "Email już istnieje"
 
         # Create user
-        response = client.table("users").insert({
+        user_data = {
             "email": email,
             "password_hash": password_hash,
             "created_at": datetime.now().isoformat()
-        }).execute()
+        }
 
-        if response.data:
-            user_id = response.data[0]["id"]
+        insert_response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/users",
+            json=user_data,
+            headers=headers,
+            timeout=10
+        )
+
+        if insert_response.status_code == 201:
+            user = insert_response.json()[0]
+            user_id = user["id"]
 
             # Assign default 'viewer' role
-            client.table("user_roles").insert({
+            role_data = {
                 "user_id": user_id,
                 "role": "viewer",
                 "created_at": datetime.now().isoformat()
-            }).execute()
+            }
+
+            requests.post(
+                f"{SUPABASE_URL}/rest/v1/user_roles",
+                json=role_data,
+                headers=headers,
+                timeout=10
+            )
 
             return True, "Rejestracja udana! Zaloguj się teraz"
         return False, "Błąd podczas rejestracji"
     except Exception as e:
         return False, f"Błąd: {str(e)}"
 
-def login(email: str, password: str) -> tuple[bool, str, int | None]:
-    """Authenticate user with Supabase
+def login(email: str, password: str) -> tuple[bool, str, str | None]:
+    """Authenticate user via Supabase REST API
 
     Returns (success, message, user_id)
     """
     try:
-        client = _get_supabase_client()
         password_hash = hash_password(password)
 
-        # Query user by email and password
-        response = client.table("users").select("id, email").eq("email", email).eq("password_hash", password_hash).execute()
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
 
-        if response.data:
-            user_id = response.data[0]["id"]
+        # Query user by email and password
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/users?email=eq.{email}&password_hash=eq.{password_hash}&select=id,email",
+            headers=headers,
+            timeout=10
+        )
+
+        if response.json():
+            user = response.json()[0]
+            user_id = user["id"]
             return True, "Login udany!", user_id
         return False, "Email lub hasło niepoprawne", None
     except Exception as e:
         return False, f"Błąd: {str(e)}", None
 
-def get_user_role(user_id: int) -> str:
-    """Fetch user role from Supabase
+def get_user_role(user_id: str) -> str:
+    """Fetch user role from Supabase REST API
 
     Returns role name: 'admin', 'trader', or 'viewer'
     """
     try:
-        client = _get_supabase_client()
-        response = client.table("user_roles").select("role").eq("user_id", user_id).execute()
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
 
-        if response.data:
-            return response.data[0]["role"]
-        return "viewer"  # Default role
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/user_roles?user_id=eq.{user_id}&select=role",
+            headers=headers,
+            timeout=10
+        )
+
+        if response.json():
+            return response.json()[0]["role"]
+        return "viewer"
     except Exception:
         return "viewer"
 
 def render_login_page():
-    """Render login/registration page with Supabase integration"""
+    """Render login/registration page with Supabase REST API"""
     _bg_path = os.path.join(os.path.dirname(__file__), "..", "pics", "NJGT.jpg")
     try:
         with open(_bg_path, "rb") as _bf:
