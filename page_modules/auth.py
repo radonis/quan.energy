@@ -9,30 +9,31 @@ from datetime import datetime
 import os
 import base64
 
-# Mock users database (in-memory - resets on app restart)
-if "users_db" not in st.session_state:
-    st.session_state.users_db = {
-        "admin@example.com": {
-            "id": "user_001",
-            "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
-            "role": "admin"
-        },
-        "trader@example.com": {
-            "id": "user_002",
-            "password_hash": hashlib.sha256("trader123".encode()).hexdigest(),
-            "role": "trader"
-        },
-        "viewer@example.com": {
-            "id": "user_003",
-            "password_hash": hashlib.sha256("viewer123".encode()).hexdigest(),
-            "role": "viewer"
-        },
-        "rluczak@outlook.com": {
-            "id": "user_004",
-            "password_hash": hashlib.sha256("MapaEnergii77$".encode()).hexdigest(),
-            "role": "admin"
+def _init_users_db():
+    """Initialize mock users database in session state"""
+    if "users_db" not in st.session_state:
+        st.session_state.users_db = {
+            "admin@example.com": {
+                "id": "user_001",
+                "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
+                "role": "admin"
+            },
+            "trader@example.com": {
+                "id": "user_002",
+                "password_hash": hashlib.sha256("trader123".encode()).hexdigest(),
+                "role": "trader"
+            },
+            "viewer@example.com": {
+                "id": "user_003",
+                "password_hash": hashlib.sha256("viewer123".encode()).hexdigest(),
+                "role": "viewer"
+            },
+            "rluczak@outlook.com": {
+                "id": "user_004",
+                "password_hash": hashlib.sha256("MapaEnergii77$".encode()).hexdigest(),
+                "role": "admin"
+            }
         }
-    }
 
 def hash_password(password: str) -> str:
     """Hash password using SHA256"""
@@ -88,6 +89,8 @@ def get_user_role(user_id: str) -> str:
 
 def render_login_page():
     """Render login/registration page"""
+    _init_users_db()
+
     _bg_path = os.path.join(os.path.dirname(__file__), "..", "pics", "NJGT.jpg")
     try:
         with open(_bg_path, "rb") as _bf:
