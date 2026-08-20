@@ -5,7 +5,6 @@ Handles user management, role assignment, and module access control
 
 import streamlit as st
 import pandas as pd
-from supabase import create_client, Client
 
 # TODO: Implement admin functions
 # - render_admin_panel()
