@@ -1,135 +1,93 @@
 """
 Authentication module for Quant Energy Trading App
-Handles user login, registration via Supabase REST API
+Mock auth - for development/testing without Supabase dependency
 """
 
 import streamlit as st
-import requests
 import hashlib
 from datetime import datetime
 import os
 import base64
 
-SUPABASE_URL = st.secrets["supabase"]["url"]
-SUPABASE_KEY = st.secrets["supabase"]["key"]
+# Mock users database (in-memory - resets on app restart)
+if "users_db" not in st.session_state:
+    st.session_state.users_db = {
+        "admin@example.com": {
+            "id": "user_001",
+            "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
+            "role": "admin"
+        },
+        "trader@example.com": {
+            "id": "user_002",
+            "password_hash": hashlib.sha256("trader123".encode()).hexdigest(),
+            "role": "trader"
+        },
+        "viewer@example.com": {
+            "id": "user_003",
+            "password_hash": hashlib.sha256("viewer123".encode()).hexdigest(),
+            "role": "viewer"
+        },
+        "rluczak@outlook.com": {
+            "id": "user_004",
+            "password_hash": hashlib.sha256("MapaEnergii77$".encode()).hexdigest(),
+            "role": "admin"
+        }
+    }
 
 def hash_password(password: str) -> str:
     """Hash password using SHA256"""
     return hashlib.sha256(password.encode()).hexdigest()
 
 def register(email: str, password: str) -> tuple[bool, str]:
-    """Register new user via Supabase REST API
+    """Register new user in mock database
 
     Returns (success, message)
     """
-    try:
-        password_hash = hash_password(password)
+    if email in st.session_state.users_db:
+        return False, "Email już istnieje"
 
-        # Check if user exists
-        headers = {
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}"
-        }
+    if len(password) < 6:
+        return False, "Hasło musi mieć co najmniej 6 znaków"
 
-        check_response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/users?email=eq.{email}&select=id",
-            headers=headers,
-            timeout=10
-        )
+    password_hash = hash_password(password)
+    user_id = f"user_{len(st.session_state.users_db) + 1:03d}"
 
-        if check_response.json():
-            return False, "Email już istnieje"
+    st.session_state.users_db[email] = {
+        "id": user_id,
+        "password_hash": password_hash,
+        "role": "viewer"
+    }
 
-        # Create user
-        user_data = {
-            "email": email,
-            "password_hash": password_hash,
-            "created_at": datetime.now().isoformat()
-        }
-
-        insert_response = requests.post(
-            f"{SUPABASE_URL}/rest/v1/users",
-            json=user_data,
-            headers=headers,
-            timeout=10
-        )
-
-        if insert_response.status_code == 201:
-            user = insert_response.json()[0]
-            user_id = user["id"]
-
-            # Assign default 'viewer' role
-            role_data = {
-                "user_id": user_id,
-                "role": "viewer",
-                "created_at": datetime.now().isoformat()
-            }
-
-            requests.post(
-                f"{SUPABASE_URL}/rest/v1/user_roles",
-                json=role_data,
-                headers=headers,
-                timeout=10
-            )
-
-            return True, "Rejestracja udana! Zaloguj się teraz"
-        return False, "Błąd podczas rejestracji"
-    except Exception as e:
-        return False, f"Błąd: {str(e)}"
+    return True, "Rejestracja udana! Zaloguj się teraz"
 
 def login(email: str, password: str) -> tuple[bool, str, str | None]:
-    """Authenticate user via Supabase REST API
+    """Authenticate user from mock database
 
     Returns (success, message, user_id)
     """
-    try:
-        password_hash = hash_password(password)
-
-        headers = {
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}"
-        }
-
-        # Query user by email and password
-        response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/users?email=eq.{email}&password_hash=eq.{password_hash}&select=id,email",
-            headers=headers,
-            timeout=10
-        )
-
-        if response.json():
-            user = response.json()[0]
-            user_id = user["id"]
-            return True, "Login udany!", user_id
+    if email not in st.session_state.users_db:
         return False, "Email lub hasło niepoprawne", None
-    except Exception as e:
-        return False, f"Błąd: {str(e)}", None
+
+    user = st.session_state.users_db[email]
+    password_hash = hash_password(password)
+
+    if user["password_hash"] != password_hash:
+        return False, "Email lub hasło niepoprawne", None
+
+    return True, "Login udany!", user["id"]
 
 def get_user_role(user_id: str) -> str:
-    """Fetch user role from Supabase REST API
+    """Get user role from mock database
 
     Returns role name: 'admin', 'trader', or 'viewer'
     """
-    try:
-        headers = {
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}"
-        }
-
-        response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/user_roles?user_id=eq.{user_id}&select=role",
-            headers=headers,
-            timeout=10
-        )
-
-        if response.json():
-            return response.json()[0]["role"]
-        return "viewer"
-    except Exception:
-        return "viewer"
+    for email, user_data in st.session_state.users_db.items():
+        if user_data["id"] == user_id:
+            return user_data["role"]
+    return "viewer"
 
 def render_login_page():
-    """Render login/registration page with Supabase REST API"""
+    """Render login/registration page"""
     _bg_path = os.path.join(os.path.dirname(__file__), "..", "pics", "NJGT.jpg")
     try:
         with open(_bg_path, "rb") as _bf:
@@ -184,6 +142,7 @@ def render_login_page():
 
     with tab_login:
         st.markdown("#### Zaloguj się")
+        st.info("Test users: admin@example.com / admin123, trader@example.com / trader123, viewer@example.com / viewer123")
         email = st.text_input("Email", key="login_email", placeholder="your@email.com")
         password = st.text_input("Hasło", type="password", key="login_password")
 
@@ -216,6 +175,7 @@ def render_login_page():
                 success, message = register(email, password)
                 if success:
                     st.success(message)
+                    st.info("Teraz zaloguj się w tab 'Logowanie'")
                 else:
                     st.error(message)
 
