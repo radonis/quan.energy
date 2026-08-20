@@ -142,7 +142,6 @@ def render_login_page():
 
     with tab_login:
         st.markdown("#### Zaloguj się")
-        st.info("Test users: admin@example.com / admin123, trader@example.com / trader123, viewer@example.com / viewer123")
         email = st.text_input("Email", key="login_email", placeholder="your@email.com")
         password = st.text_input("Hasło", type="password", key="login_password")
 
